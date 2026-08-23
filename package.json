@@ -10,15 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.11",
     "@reduxjs/toolkit": "^2.12.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.19.0",
+    "lucide-react": "^1.33.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.2",
-    "viem": "^2.55.19",
-    "wagmi": "^3.7.6",
+    "tailwindcss": "^4.3.3",
+    "viem": "~2.55.19",
+    "wagmi": "^2.19.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
