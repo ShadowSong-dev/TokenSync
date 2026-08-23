@@ -1,8 +1,12 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { addressActions } from "../store/addressSlice";
+import { useAppDispatch } from "../store/hook";
 
 const heroBg = "https://lh3.googleusercontent.com/aida/AEtjO1VvLCVYMI8XYsYl7qvXvBxT6TriGCjxV0KiOrNXChjOW5O_wfX2pkxlVA5BqEGHfx12wfFyH1NC23XTNRliUDZkaUrs7LwGRN1Zgb-i8cir6mg--fnEHx_KPEjkaJ_EulS7bXKHBZuL_RvtP_p-Tao7wzMErZ0JM77PCcM86wZXdjp3SMaEReTBOfKM3I5H8P8B3fiF5tUJeEHBi9cqAEjngJ6AeNMaIz41-IElCWf4Ek5qvbjZggRAVeY";
 
 export function Home() {
+    const dispatchAddress = useAppDispatch();
+
     return (
         <>
             <section className="relative overflow-hidden px-margin-mobile pb-16 pt-20 text-center md:px-margin-desktop">
@@ -23,6 +27,7 @@ export function Home() {
                         type="text"
                         placeholder="Search address/ENS"
                         className="w-full rounded-lg border border-border-light bg-surface-subtle py-3 pl-12 pr-4 outline-none transition-all focus:border-primary-container focus:ring-1 focus:ring-primary-container"
+                        onChange={(e)=> dispatchAddress(addressActions.switch(e.target.value))}
                         />
                     </div>
                     <h1>Or</h1>
