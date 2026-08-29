@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState: string | null = null;
+const initialState: string = 'null';
 
 // The current address that user search, not the current connected wallet address
 const addressSlice = createSlice({

@@ -1,6 +1,26 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAppDispatch } from "../store/hook";
+import { addressActions } from "../store/addressSlice";
+import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 
 export function TopBar() {
+  const dispatchAddress = useAppDispatch();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const _navigate = useNavigate();
+  function navigate(address: string | null) {
+      if(!address) return;
+      _navigate(`/address/${address}`);
+  }
+
+  function handleSearch() {
+      const value = inputRef.current?.value.trim();
+      if(!value) return;
+      dispatchAddress(addressActions.switch(value));
+      navigate(value);
+  }
+
   return (
     <header className="flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white px-4">
       {/* Left Section: Logo and Navigation */}
@@ -21,16 +41,25 @@ export function TopBar() {
       <div className="flex items-center space-x-4 max-w-350 mx-auto">
         {/* Search Bar */}
         <div className="relative w-80">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
+          <div className="relative w-full">
+            <span
+            className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer text-on-surface-variant transition-all duration-200 hover:scale-110 hover:text-primary hover:drop-shadow"
+            onClick={handleSearch}
+            >
+            search
+            </span>
+            <input
+            ref={inputRef}
             type="text"
-            className="block w-full rounded-full border border-gray-200 bg-[#f7fafc] py-2 pl-10 pr-4 text-sm focus:border-[#ff6b4a] focus:outline-none focus:ring-1 focus:ring-[#ff6b4a]"
-            placeholder="Search address / ENS "
-          />
+            placeholder="Search address/ENS"
+            className="w-full rounded-lg border border-border-light bg-surface-subtle py-3 pl-12 pr-4 outline-none transition-all focus:border-primary-container focus:ring-1 focus:ring-primary-container"
+            onKeyDown={(e)=> {
+              if(e.key == 'Enter') {
+                handleSearch();
+              };
+            }}
+            />
+          </div>
         </div>
 
         {/* Icons and Wallet Button */}

@@ -8,7 +8,7 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout/>} />
-        <Route path="/address/*"element={<Dashboard/>} />
+        <Route path="/address/:address" element={<Dashboard/>} />
       </Routes>
     </BrowserRouter>
   )
