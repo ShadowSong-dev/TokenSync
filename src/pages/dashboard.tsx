@@ -4,6 +4,7 @@ import { TokenList } from "../componments/TokenList";
 import { useAppSelector } from "../store/hook";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTokensBalance } from "../utils/alchemy";
+import { useEnsName } from "wagmi";
 
 type Chain = {
   name: string;
@@ -14,6 +15,9 @@ type Chain = {
 export function Dashboard() {
     const address = useAppSelector((state)=> state.addressReducer);
     const [chains, setChains] = useState<Chain[]>([]);
+    const ens = useEnsName({
+        address: address as `0x${string}`
+    })
 
     const { data: tokens, isPending, isError } = useQuery({
         queryKey: ["token-balances", address],
@@ -75,8 +79,8 @@ export function Dashboard() {
                         </div>
                     </div>
                     <div className="pb-2">
-                        <h1 className="font-display-lg text-display-lg text-on-surface mb-1 flex items-center gap-2">
-                        {address}
+                        <h1 className="font-display-lg text-display-lg text-on-surface mb-1 flex items-center gap-2 text-2xl">
+                        {ens.data ?? address}
                         </h1>
                         <div className="flex items-center gap-2 text-body-sm text-secondary">
                         <span>{address}</span>
