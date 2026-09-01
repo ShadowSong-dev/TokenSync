@@ -1,20 +1,26 @@
 const BASE_URL = 'https://tokensync-api.shadowsong-dev.workers.dev/';
 
-// API return
-export type Token_Balances_By_Wallet_Return_tokens = {
-  address: string,
-  network: string,
-  tokenAddress: string | null,
-  tokenBalance: string
-}
-export type Worker_Retern = Token_Balances_By_Wallet_Return_tokens[][] | { error: string };
+export type TokenItem = {
+  network: string;
+  address: string | null; //contract address; null = native
+  decimals: number;
+  balance: number;
+  value: number;
+  lastUpdateAt: number;
+};
 
-export async function fetchTokensBalance(address: string) {
+// Worker return
+type Success = { ok: true; data: TokenItem[]; address: string };
+type Failure = { ok: false; error: string };
+export type TokensBalanceResult = Success | Failure;
+
+export async function fetchTokensBalance(address: string): Promise<TokensBalanceResult> {
   const url = new URL(BASE_URL);
   url.searchParams.set('address', address);
 
-  const reqInit = new Request(url);
-
-  const res = await fetch(reqInit);
-  return await res.json() as Worker_Retern;
+  const res = await fetch(url);
+  if (!res.ok) {
+    return { ok: false, error: `request failed (status: ${res.status})` };
+  }
+  return (await res.json()) as TokensBalanceResult;
 }

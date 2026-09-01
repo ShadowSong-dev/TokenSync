@@ -1,27 +1,47 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TopBar } from "../componments/TopBar";
+import { TokenList } from "../componments/TokenList";
 import { useAppSelector } from "../store/hook";
-import { useQuery, type UseQueryReturnType } from "wagmi/query";
-import { fetchTokensBalance, type Token_Balances_By_Wallet_Return_tokens } from "../utils/alchemy";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTokensBalance } from "../utils/alchemy";
 
 type Chain = {
   name: string;
   image: string;
+  apiName: string;
 };
 
 export function Dashboard() {
     const address = useAppSelector((state)=> state.addressReducer);
     const [chains, setChains] = useState<Chain[]>([]);
 
-    const result: UseQueryReturnType<Token_Balances_By_Wallet_Return_tokens[] | void> = useQuery({
-        queryKey: [address],
-        queryFn: async ()=> {
-            const resarr = await fetchTokensBalance(address);
-            if(Array.isArray(resarr)) {
-                return resarr.flat();
-            }
+    const { data: tokens, isPending, isError } = useQuery({
+        queryKey: ["token-balances", address],
+        queryFn: async () => {
+            const result = await fetchTokensBalance(address);
+            if (!result.ok) throw new Error(result.error);
+            return result.data;
+        },
+        enabled: !!address && address !== "null", // skip the placeholder initial address
+    });
+
+    // Portfolio totals over the full token set (complete once the single fetch lands).
+    const totalValue = useMemo(() => {
+        return (tokens ?? []).reduce((acc, token) => {
+            const value = Number(token.value);
+            return acc + (Number.isFinite(value) ? value : 0);
+        }, 0);
+    }, [tokens]);
+
+    const perChainValue = useMemo(() => {
+        const map = new Map<string, number>();
+        for (const token of tokens ?? []) {
+            const value = Number(token.value);
+            if (!Number.isFinite(value)) continue;
+            map.set(token.network, (map.get(token.network) ?? 0) + value);
         }
-    })
+        return map;
+    }, [tokens]);
 
     useEffect(() => {
         fetch("/chains.json")
@@ -71,7 +91,7 @@ export function Dashboard() {
                     <div className="mt-4 md:mt-0 flex items-end">
                     <div className="text-right">
                         <div className="flex items-baseline justify-end gap-2">
-                        <span className="font-display-lg text-display-lg">$0</span>
+                        <span className="font-display-lg text-display-lg">${totalValue.toFixed(2)}</span>
                         <span className="font-label-md text-label-md text-success-green flex items-center">
                             <span className="material-symbols-outlined text-[16px] mr-1">arrow_upward</span>
                             +0.76%
@@ -107,13 +127,22 @@ export function Dashboard() {
                                 {chain.name}
                                 </span>
                                 <div className="flex items-baseline gap-1">
-                                <span className="font-headline-sm text-headline-sm text-on-surface">$0</span>
+                                <span className="font-headline-sm text-headline-sm text-on-surface">${(perChainValue.get(chain.apiName) ?? 0).toFixed(2)}</span>
                                 <span className="font-body-sm text-body-sm text-tertiary">-%</span>
                                 </div>
                             </div>
                             </div>
                         ))}
                     </div>
+
+                    {/* Token List */}
+                    {isPending ? (
+                        <p className="mt-6 text-center text-body-sm text-tertiary">Loading tokens…</p>
+                    ) : isError ? (
+                        <p className="mt-6 text-center text-body-sm text-error">Failed to load tokens.</p>
+                    ) : (
+                        <TokenList key={address} tokens={tokens ?? []} />
+                    )}
                 </div>
                 </div>
             </main>
