@@ -1,25 +1,8 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAppDispatch } from "../store/hook";
-import { addressActions } from "../store/addressSlice";
-import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useAddressSearch } from "../hooks/useAddressSearch";
 
 export function TopBar() {
-  const dispatchAddress = useAppDispatch();
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const _navigate = useNavigate();
-  function navigate(address: string | null) {
-      if(!address) return;
-      _navigate(`/address/${address}`);
-  }
-
-  function handleSearch() {
-      const value = inputRef.current?.value.trim();
-      if(!value) return;
-      dispatchAddress(addressActions.switch(value));
-      navigate(value);
-  }
+  const { inputRef, resolving, error, handleSearch, clearError } = useAddressSearch();
 
   return (
     <header className="flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white px-4">
@@ -31,7 +14,7 @@ export function TopBar() {
           </div>
           <span className="text-xl font-bold text-[#2d3748]">TokenSync</span>
         </div>
-        
+
         <nav className="hidden space-x-6 md:flex">
 
         </nav>
@@ -43,10 +26,10 @@ export function TopBar() {
         <div className="relative w-80">
           <div className="relative w-full">
             <span
-            className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer text-on-surface-variant transition-all duration-200 hover:scale-110 hover:text-primary hover:drop-shadow"
+            className={`material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer text-on-surface-variant transition-all duration-200 hover:scale-110 hover:text-primary hover:drop-shadow ${resolving ? 'animate-spin text-primary pointer-events-none' : ''}`}
             onClick={handleSearch}
             >
-            search
+            {resolving ? 'progress_activity' : 'search'}
             </span>
             <input
             ref={inputRef}
@@ -58,7 +41,13 @@ export function TopBar() {
                 handleSearch();
               };
             }}
+            onChange={clearError}
             />
+            {error && (
+            <p className="absolute left-0 top-full z-50 mt-1 whitespace-nowrap rounded-md bg-white px-2 py-1 text-left text-body-sm text-error shadow-level-1">
+              {error}
+            </p>
+            )}
           </div>
         </div>
 
